@@ -6,9 +6,10 @@ cap = cv2.VideoCapture(video_path)
 
 sustractor = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=50, detectShadows=True)
 
-# contadores
+# Contadores independientes y el total general
 contador_derecha = 0
 contador_izquierda = 0
+contador_total = 0
 
 # Lista de diccionarios para hacer seguimiento a cada persona de forma individual
 rastreadores = [] 
@@ -69,12 +70,14 @@ while True:
                 # Si estaba a la izquierda y ahora pasó a la derecha
                 if rastreador['cx'] <= linea_x and cx > linea_x and not rastreador['contado']:
                     contador_derecha += 1
+                    contador_total += 1
                     rastreador['contado'] = True
                     color_linea = (0, 255, 0) 
                 
                 # Si estaba a la derecha y ahora pasó a la izquierda
                 elif rastreador['cx'] >= linea_x and cx < linea_x and not rastreador['contado']:
                     contador_izquierda += 1
+                    contador_total += 1
                     rastreador['contado'] = True
                     color_linea = (0, 255, 0) 
                 
@@ -96,10 +99,11 @@ while True:
     grosor_linea = 5 if color_linea == (0, 255, 0) else 2
     cv2.line(frame_recortado, (linea_x, 0), (linea_x, h_recorte), color_linea, grosor_linea)
 
-    # Panel de resultados ajustado para dos líneas de texto
-    cv2.rectangle(frame_recortado, (10, 10), (320, 80), (0, 0, 0), -1)
+    # Panel de resultados 
+    cv2.rectangle(frame_recortado, (10, 10), (320, 115), (0, 0, 0), -1)
     cv2.putText(frame_recortado, f'Derecha ->: {contador_derecha}', (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
     cv2.putText(frame_recortado, f'<- Izquierda: {contador_izquierda}', (20, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    cv2.putText(frame_recortado, f'Total: {contador_total}', (20, 95), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
     cv2.imshow('Monitoreo con Tracking', frame_recortado)
     cv2.imshow('Mascara en Blanco y Negro (Filtro)', mascara_cerrada)
